@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Pencil, Trash2, Plus, ArrowLeft, Trophy, X } from "lucide-react";
 import Link from "next/link";
