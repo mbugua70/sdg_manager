@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Pencil, Trash2, Plus, ArrowLeft } from "lucide-react";
 import Link from "next/link";
@@ -18,7 +17,6 @@ interface BA {
 }
 
 function BAPageContent() {
-  const searchParams = useSearchParams();
   const [data, setData] = useState<BA[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -49,12 +47,6 @@ function BAPageContent() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  useEffect(() => {
-    if (searchParams.get("action") === "add") {
-      openAddModal();
-    }
-  }, [searchParams]);
 
   const openAddModal = () => {
     setEditItem(null);
@@ -301,15 +293,5 @@ function BAPageContent() {
 }
 
 export default function BAPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center py-20">
-          <div className="h-8 w-8 animate-spin rounded-full border-3 border-zinc-200 border-t-indigo-600" />
-        </div>
-      }
-    >
-      <BAPageContent />
-    </Suspense>
-  );
+  return <BAPageContent />;
 }

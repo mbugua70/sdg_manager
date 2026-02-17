@@ -1,7 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
 import { Pencil, Trash2, Plus, ArrowLeft, Trophy, X } from "lucide-react";
 import Link from "next/link";
@@ -234,7 +233,6 @@ function PointsPanel({
 }
 
 function GamesPageContent() {
-  const searchParams = useSearchParams();
   const [data, setData] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -261,12 +259,6 @@ function GamesPageContent() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
-
-  useEffect(() => {
-    if (searchParams.get("action") === "add") {
-      openAddModal();
-    }
-  }, [searchParams]);
 
   const openAddModal = () => {
     setEditItem(null);
