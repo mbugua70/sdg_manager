@@ -79,7 +79,7 @@ function TeamsPageContent() {
   const handleSaveConfirmed = async () => {
     setSaving(true);
     try {
-      const method = editItem ? "PATCH" : "POST";
+      const method = "POST";
       const fd = new FormData();
       if (editItem) fd.append("id", editItem.id);
       fd.append("team_name", teamName);

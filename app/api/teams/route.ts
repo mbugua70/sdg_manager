@@ -30,19 +30,6 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(data, { status: res.status });
 }
 
-export async function PATCH(request: NextRequest) {
-  const session = await getSession();
-  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-
-  const formData = await request.formData();
-  const res = await fetch(`${API_BASE_URL}/team/manage.php`, {
-    method: "PATCH",
-    headers: { Authorization: `Bearer ${session.token}` },
-    body: formData,
-  });
-  const data = await res.json();
-  return NextResponse.json(data, { status: res.status });
-}
 
 export async function DELETE(request: NextRequest) {
   const session = await getSession();
