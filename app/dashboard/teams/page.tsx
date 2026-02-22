@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { type ColumnDef } from "@tanstack/react-table";
-import { Pencil, Trash2, Plus, ArrowLeft } from "lucide-react";
+import { Pencil, Trash2, Plus, ArrowLeft, ImageIcon } from "lucide-react";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import DataTable from "@/components/DataTable";
@@ -12,6 +12,7 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 interface Team {
   id: string;
   team_name: string;
+  logo_url: string | null;
   created_at: string;
 }
 
@@ -25,6 +26,9 @@ function TeamsPageContent() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [teamName, setTeamName] = useState("");
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -45,13 +49,25 @@ function TeamsPageContent() {
   const openAddModal = () => {
     setEditItem(null);
     setTeamName("");
+    setLogoFile(null);
+    setLogoPreview(null);
     setModalOpen(true);
   };
 
   const openEditModal = (item: Team) => {
     setEditItem(item);
     setTeamName(item.team_name);
+    setLogoFile(null);
+    setLogoPreview(item.logo_url);
     setModalOpen(true);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setLogoFile(file);
+    if (file) {
+      setLogoPreview(URL.createObjectURL(file));
+    }
   };
 
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -64,15 +80,12 @@ function TeamsPageContent() {
     setSaving(true);
     try {
       const method = editItem ? "PATCH" : "POST";
-      const payload = editItem
-        ? { id: editItem.id, team_name: teamName }
-        : { team_name: teamName };
+      const fd = new FormData();
+      if (editItem) fd.append("id", editItem.id);
+      fd.append("team_name", teamName);
+      if (logoFile) fd.append("logo", logoFile);
 
-      const res = await fetch("/api/teams", {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch("/api/teams", { method, body: fd });
       if (!res.ok) throw new Error();
 
       toast.success(editItem ? "Team updated" : "Team created");
@@ -111,6 +124,22 @@ function TeamsPageContent() {
   };
 
   const columns: ColumnDef<Team, unknown>[] = [
+    {
+      id: "logo",
+      header: "Logo",
+      cell: ({ row }) =>
+        row.original.logo_url ? (
+          <img
+            src={row.original.logo_url}
+            alt={row.original.team_name}
+            className="h-9 w-9 rounded-full object-cover"
+          />
+        ) : (
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-zinc-100 dark:bg-zinc-800">
+            <ImageIcon className="h-4 w-4 text-zinc-400" />
+          </div>
+        ),
+    },
     {
       accessorKey: "team_name",
       header: "Team Name",
@@ -206,6 +235,27 @@ function TeamsPageContent() {
               className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2.5 text-sm text-zinc-900 outline-none transition-colors focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
             />
           </div>
+
+          <div>
+            <label className="mb-1.5 block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+              Logo
+            </label>
+            {logoPreview && (
+              <img
+                src={logoPreview}
+                alt="Logo preview"
+                className="mb-2 h-16 w-16 rounded-full object-cover"
+              />
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full rounded-lg border border-zinc-200 bg-white px-4 py-2 text-sm text-zinc-900 outline-none transition-colors focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 file:mr-3 file:rounded-md file:border-0 file:bg-amber-50 file:px-3 file:py-1 file:text-xs file:font-medium file:text-amber-700 dark:file:bg-amber-500/10 dark:file:text-amber-400"
+            />
+          </div>
+
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
